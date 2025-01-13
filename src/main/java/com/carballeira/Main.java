@@ -14,15 +14,15 @@ public class Main {
 
         // Ejercicio 2: Modificar sin sentencias preparadas
         System.out.println("\nEjercicio 2: Modificar sin sentencias preparadas");
-        modificarDepartamentoSinPreparadas(10, "FINANZAS");
+        modificarDepartamentoSinPreparadas(10, "MODIFICADO1");
 
         // Ejercicio 3: Modificar con sentencias preparadas
         System.out.println("\nEjercicio 3: Modificar con sentencias preparadas");
-        modificarDepartamentoConPreparadas(20, "INVESTIGACIÓN");
+        modificarDepartamentoConPreparadas(20, "MODIFICADO2");
 
         // Ejercicio 4: Modificar con transacciones
         System.out.println("\nEjercicio 4: Modificar con transacciones");
-        modificarDepartamentoConTransacciones(30, "VENTAS");
+        modificarDepartamentoConTransacciones(30, "MODIFICADO3");
     }
 
 
