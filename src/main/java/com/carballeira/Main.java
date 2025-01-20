@@ -1,6 +1,10 @@
 package com.carballeira;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+import static com.carballeira.AccesoBD.conectar;
 
 public class Main {
     private static final String URL = "jdbc:mysql://localhost:3307/ejerciciosboletin";
@@ -8,43 +12,48 @@ public class Main {
     private static final String PASSWORD = "";
 
     public static void main(String[] args) {
-        // Ejercicio 1: Mostrar departamentos
-        System.out.println("Ejercicio 1: Visualizar departamentos");
-        mostrarDepartamentos();
+        Scanner scanner = new Scanner(System.in);
+        int opcion = 0;
+        crearProcedimiento();
+        while (opcion != 9) {
+            // Menú de opciones principal
+            System.out.println("Seleccione una opción:");
+            System.out.println("1. Mostrar departamentos(Ejercicio 1)");
+            System.out.println("2. Modificar sin sentencias preparadas (Ejercicio 2)");
+            System.out.println("3. Modificar con sentencias preparadas (Ejercicio 3)");
+            System.out.println("4. Modificar con transacciones (Ejercicio 4)");
+            System.out.println("5. Menú de operaciones con departamentos (Ejercicio 9)");
+            System.out.println("9. Salir");
+            System.out.print("Opción: ");
+            opcion = scanner.nextInt();
 
-        // Ejercicio 2: Modificar sin sentencias preparadas
-        System.out.println("\nEjercicio 2: Modificar sin sentencias preparadas");
-        modificarDepartamentoSinPreparadas(10, "MODIFICADO1");
-
-        // Ejercicio 3: Modificar con sentencias preparadas
-        System.out.println("\nEjercicio 3: Modificar con sentencias preparadas");
-        modificarDepartamentoConPreparadas(20, "MODIFICADO2");
-
-        // Ejercicio 4: Modificar con transacciones
-        System.out.println("\nEjercicio 4: Modificar con transacciones");
-        modificarDepartamentoConTransacciones(30, "MODIFICADO3");
-    }
-
-
-
-
-    // Conectar a la base de datos
-    public static Connection conectar() throws SQLException {
-        Connection conexion = null;
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            conexion = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("Conexión exitosa a la base de datos.");
-        } catch (ClassNotFoundException e) {
-            System.err.println("Error al cargar el driver JDBC: " + e.getMessage());
-        } catch (SQLException e) {
-            System.err.println("Error al conectar a la base de datos: " + e.getMessage());
-            throw e;
+            switch (opcion) {
+                case 1:
+                    mostrarDepartamentos();
+                    break;
+                case 2:
+                    modificarDepartamentoSinPreparadas(scanner);
+                    break;
+                case 3:
+                    modificarDepartamentoConPreparadas(scanner);
+                    break;
+                case 4:
+                    modificarDepartamentoConTransacciones(scanner);
+                    break;
+                case 5:
+                    menuAccesoBD(scanner);
+                    break;
+                case 9:
+                    System.out.println("Saliendo...");
+                    break;
+                default:
+                    System.out.println("Opción no válida. Por favor, intente nuevamente.");
+            }
         }
-        return conexion;
+        scanner.close();
     }
 
-    // Ejercicio 1: Visualizar número y nombre de todos los departamentos
+    // Métodos de los ejercicios anteriores (1 al 4)
     public static void mostrarDepartamentos() {
         String consulta = "SELECT dept_no, dnombre FROM departamentos";
 
@@ -58,10 +67,14 @@ public class Main {
         }
     }
 
-    // Ejercicio 2: Modificar departamento sin sentencias preparadas
-    public static void modificarDepartamentoSinPreparadas(int numeroDepartamento, String nuevoNombre) {
-        String consulta = "UPDATE departamentos SET dnombre = '" + nuevoNombre + "' WHERE dept_no = " + numeroDepartamento;
+    public static void modificarDepartamentoSinPreparadas(Scanner scanner) {
+        System.out.println("Introduce numero de departamento");
+        int numeroDepartamento = scanner.nextInt();
+        scanner.nextLine(); // Consumir el salto de línea
 
+        System.out.println("Introduce el nuevo nombre del departamento");
+        String nuevoNombre = scanner.nextLine();
+        String consulta = "UPDATE departamentos SET dnombre = '" + nuevoNombre + "' WHERE dept_no = " + numeroDepartamento;
         try (Connection conexion = conectar(); Statement stmt = conexion.createStatement()) {
             int filasAfectadas = stmt.executeUpdate(consulta);
             System.out.println("Filas afectadas : " + filasAfectadas);
@@ -70,8 +83,14 @@ public class Main {
         }
     }
 
-    // Ejercicio 3: Modificar departamento con sentencias preparadas
-    public static void modificarDepartamentoConPreparadas(int numeroDepartamento, String nuevoNombre) {
+    public static void modificarDepartamentoConPreparadas(Scanner scanner) {
+        System.out.println("Introduce numero de departamento");
+        int numeroDepartamento = scanner.nextInt();
+        scanner.nextLine(); // Consumir el salto de línea
+
+        System.out.println("Introduce el nuevo nombre del departamento");
+        String nuevoNombre = scanner.nextLine();
+
         String consulta = "UPDATE departamentos SET dnombre = ? WHERE dept_no = ?";
 
         try (Connection conexion = conectar(); PreparedStatement pstmt = conexion.prepareStatement(consulta)) {
@@ -85,8 +104,14 @@ public class Main {
         }
     }
 
-    // Ejercicio 4: Modificar departamento con transacciones
-    public static void modificarDepartamentoConTransacciones(int numeroDepartamento, String nuevoNombre) {
+    public static void modificarDepartamentoConTransacciones(Scanner scanner) {
+        System.out.println("Introduce numero de departamento");
+        int numeroDepartamento = scanner.nextInt();
+        scanner.nextLine(); // Consumir el salto de línea
+
+        System.out.println("Introduce el nuevo nombre del departamento");
+        String nuevoNombre = scanner.nextLine();
+
         String consulta = "UPDATE departamentos SET dnombre = ? WHERE dept_no = ?";
 
         try (Connection conexion = conectar()) {
@@ -109,5 +134,123 @@ public class Main {
             System.err.println("Error al conectar o manejar la transacción: " + e.getMessage());
         }
     }
+    public static void crearProcedimiento() {
+        Connection connection = null;
+        Statement statement = null;
+
+        try {
+            // Conexión a la base de datos
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+
+            // Crear la sentencia para eliminar y luego crear el procedimiento
+            statement = connection.createStatement();
+
+            // Sentencia para eliminar el procedimiento si existe
+            String dropProcedure = "DROP PROCEDURE IF EXISTS actualizaDept";
+            statement.execute(dropProcedure);
+
+            // Sentencia para crear el procedimiento
+            String createProcedure =
+                    "CREATE PROCEDURE actualizaDept(cod INT, localidad VARCHAR(13)) " +
+                            "BEGIN " +
+                            "UPDATE dept SET loc = localidad WHERE deptno = cod; " +
+                            "END";
+
+            // Ejecutar la creación del procedimiento almacenado
+            statement.execute(createProcedure);
+
+            System.out.println("Procedimiento creado con éxito.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (statement != null) statement.close();
+                if (connection != null) connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Menú de operaciones para la clase AccesoBD
+    public static void menuAccesoBD(Scanner scanner) {
+        int opcion = 0;
+
+        while (opcion != 9) {
+            System.out.println("\nMenú de operaciones con departamentos:");
+            System.out.println("1. Insertar departamento");
+            System.out.println("2. Obtener todos los departamentos");
+            System.out.println("3. Obtener departamento por número");
+            System.out.println("4. Actualizar departamento");
+            System.out.println("5. Eliminar departamento");
+            System.out.println("6. Actualizar localidad usando el procedimiento almacenado");
+
+            System.out.println("9. Volver al menú principal");
+            System.out.print("Opción: ");
+            opcion = scanner.nextInt();
+
+            switch (opcion) {
+                case 1:
+                    System.out.print("Ingrese el número del departamento: ");
+                    int numero = scanner.nextInt();
+                    scanner.nextLine(); // Consumir el salto de línea
+                    System.out.print("Ingrese el nombre del departamento: ");
+                    String nombre = scanner.nextLine();
+                    System.out.print("Ingrese la localidad del departamento: ");
+                    String localidad = scanner.nextLine();
+                    AccesoBD.insertarDepartamento(numero, nombre, localidad);
+                    break;
+                case 2:
+                    ArrayList<Departamento> departamentos = AccesoBD.obtenerTodosLosDepartamentos();
+                    System.out.println("Departamentos:");
+                    for (Departamento dept : departamentos) {
+                        System.out.println(dept);
+                    }
+                    break;
+                case 3:
+                    System.out.print("Ingrese el número del departamento a buscar: ");
+                    int numBuscar = scanner.nextInt();
+                    Departamento dept = AccesoBD.obtenerDepartamentoPorNumero(numBuscar);
+                    if (dept != null) {
+                        System.out.println("Departamento encontrado: " + dept);
+                    } else {
+                        System.out.println("Departamento no encontrado.");
+                    }
+                    break;
+                case 4:
+                    System.out.print("Ingrese el número del departamento a actualizar: ");
+                    int numActualizar = scanner.nextInt();
+                    scanner.nextLine(); // Consumir el salto de línea
+                    System.out.print("Ingrese el nuevo nombre del departamento: ");
+                    String nuevoNombre = scanner.nextLine();
+                    System.out.print("Ingrese la nueva localidad del departamento: ");
+                    String nuevaLocalidad = scanner.nextLine();
+                    Departamento deptActualizar = new Departamento(numActualizar, nuevoNombre, nuevaLocalidad);
+                    AccesoBD.actualizarDepartamento(deptActualizar);
+                    break;
+                case 5:
+                    System.out.print("Ingrese el número del departamento a eliminar: ");
+                    int numEliminar = scanner.nextInt();
+                    AccesoBD.eliminarDepartamento(numEliminar);
+                    break;
+
+                case 6:
+                    System.out.println("Introduce el número del departamento:");
+                    int deptNumero = scanner.nextInt();
+                    scanner.nextLine(); // Limpiar el buffer
+                    System.out.println("Introduce la nueva localidad:");
+                    String nuevaLocalidad2 = scanner.nextLine();
+                    AccesoBD.actualizarLocalidad(deptNumero, nuevaLocalidad2);
+                    break;
+
+                case 9:
+                    System.out.println("Volviendo al menú principal...");
+                    break;
+                default:
+                    System.out.println("Opción no válida. Por favor, intente nuevamente.");
+            }
+        }
+    }
+
 
 }
